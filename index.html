@@ -304,6 +304,7 @@
     .badge-wa { background: var(--green-bg); color: var(--green-text); }
     .badge-ig { background: var(--pink-bg); color: var(--pink-text); }
     .badge-tg { background: var(--teal-bg); color: var(--teal-text); }
+    .badge-strava { background: var(--amber-bg); color: var(--amber-text); }
 
     .query-text {
       font-size: 12px;
@@ -576,6 +577,7 @@
           <button class="platform-btn active" data-platform="whatsapp" onclick="togglePlatform(this)"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
           <button class="platform-btn" data-platform="instagram" onclick="togglePlatform(this)"><i class="ti ti-brand-instagram"></i> Instagram</button>
           <button class="platform-btn" data-platform="telegram" onclick="togglePlatform(this)"><i class="ti ti-brand-telegram"></i> Telegram</button>
+          <button class="platform-btn" data-platform="strava" onclick="togglePlatform(this)"><i class="ti ti-run"></i> Strava clubs</button>
         </div>
       </div>
 
@@ -701,6 +703,11 @@
           <div class="tip-title" style="color: var(--pink-text);">Instagram</div>
           <p style="color: var(--pink-text);">Instagram has no group structure. The query finds public accounts matching your keyword and location. Supplement with hashtag and location tag searches directly inside Instagram.</p>
         </div>
+
+        <div class="tip-card" style="background: var(--amber-bg); border-color: rgba(133,79,11,0.15);">
+          <div class="tip-title" style="color: var(--amber-text);">Strava clubs</div>
+          <p style="color: var(--amber-text);">The query <code>site:strava.com/clubs &quot;[city]&quot; &quot;[keyword]&quot;</code> returns indexed public clubs. Each club page shows member count, sport type, and activity level. Strava has no club search API, so Google is the only discovery route. Use the Python script (<code>strava_club_finder.py</code>) to enrich results automatically.</p>
+        </div>
       </div>
     </div>
 
@@ -723,6 +730,7 @@
           <option value="wa">WhatsApp</option>
           <option value="ig">Instagram</option>
           <option value="tg">Telegram</option>
+          <option value="strava">Strava club</option>
         </select>
       </div>
       <div class="field">
@@ -831,6 +839,10 @@
     if (platforms.includes('telegram')) {
       queries.push({ badge: 'badge-tg', label: 'Telegram groups', query: `site:t.me "${loc}" "${kw}"`, url: `https://www.google.com/search?q=site%3At.me+${locEnc}+${kwEnc}` });
     }
+    if (platforms.includes('strava')) {
+      queries.push({ badge: 'badge-strava', label: 'Strava clubs', query: `site:strava.com/clubs "${loc}" "${kw}"`, url: `https://www.google.com/search?q=site%3Astrava.com%2Fclubs+${locEnc}+${kwEnc}` });
+      queries.push({ badge: 'badge-strava', label: 'Strava clubs — sport', query: `site:strava.com/clubs "${loc}" "${kw}" cycling OR running OR hiking`, url: `https://www.google.com/search?q=site%3Astrava.com%2Fclubs+${locEnc}+${kwEnc}+cycling+OR+running+OR+hiking` });
+    }
 
     const list = document.getElementById('queries-list');
     list.innerHTML = '';
@@ -886,8 +898,8 @@
 
   const statusColors = { discovered: 'color:var(--text-secondary)', qualified: 'color:var(--blue-text)', contacted: 'color:var(--green-text)', engaged: 'color:var(--teal-text); font-weight:500' };
   const statusLabels = { discovered: 'Discovered', qualified: 'Qualified', contacted: 'Contacted', engaged: 'Engaged' };
-  const platformLabels = { fb: 'FB', wa: 'WA', ig: 'IG', tg: 'TG' };
-  const platformBadges = { fb: 'badge-fb', wa: 'badge-wa', ig: 'badge-ig', tg: 'badge-tg' };
+  const platformLabels = { fb: 'FB', wa: 'WA', ig: 'IG', tg: 'TG', strava: 'Strava' };
+  const platformBadges = { fb: 'badge-fb', wa: 'badge-wa', ig: 'badge-ig', tg: 'badge-tg', strava: 'badge-strava' };
 
   function renderRegistry() {
     const tbody = document.getElementById('registry-body');
