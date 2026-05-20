@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community Discovery Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-sans: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --surface-2: #f0efe9;
+      --border: rgba(0,0,0,0.1);
+      --border-strong: rgba(0,0,0,0.2);
+      --text-primary: #1a1a18;
+      --text-secondary: #6b6b65;
+      --text-hint: #9b9b94;
+      --blue-bg: #E6F1FB;
+      --blue-text: #185FA5;
+      --blue-dark: #0C447C;
+      --green-bg: #EAF3DE;
+      --green-text: #3B6D11;
+      --pink-bg: #FBEAF0;
+      --pink-text: #993556;
+      --teal-bg: #E1F5EE;
+      --teal-text: #0F6E56;
+      --amber-bg: #FAEEDA;
+      --amber-text: #854F0B;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* Layout */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface);
+      border-right: 0.5px solid var(--border);
+      padding: 2rem 1.25rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--text-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-mark i { color: white; font-size: 17px; }
+
+    .logo-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .logo-tagline {
+      font-size: 11px;
+      color: var(--text-hint);
+    }
+
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--text-hint);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      margin-top: 1.5rem;
+    }
+
+    .sidebar-section-title:first-of-type { margin-top: 0; }
+
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.12s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .sidebar-nav-item:hover { background: var(--surface-2); color: var(--text-primary); }
+    .sidebar-nav-item.active { background: var(--surface-2); color: var(--text-primary); font-weight: 500; }
+    .sidebar-nav-item i { font-size: 16px; }
+
+    .sidebar-stats {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 0.5px solid var(--border);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 12px;
+    }
+
+    .stat-label { color: var(--text-secondary); }
+    .stat-value { font-weight: 500; color: var(--text-primary); }
+
+    /* Main content */
+    .main {
+      padding: 2rem 2.5rem;
+      max-width: 900px;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .page-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Form elements */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.span-2 { grid-column: span 2; }
+
+    label.field-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--text-hint);
+      text-transform: uppercase;
+    }
+
+    input[type="text"], input[type="url"], select, textarea {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      padding: 9px 12px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.12s;
+      width: 100%;
+    }
+
+    input[type="text"]:focus, input[type="url"]:focus, select:focus, textarea:focus {
+      border-color: var(--blue-dark);
+      box-shadow: 0 0 0 3px rgba(24,95,165,0.08);
+    }
+
+    input::placeholder { color: var(--text-hint); }
+
+    /* Platform toggles */
+    .platform-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+
+    .platform-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 13px;
+      font-family: var(--font-sans);
+      color: var(--text-secondary);
+      transition: all 0.12s;
+    }
+
+    .platform-btn:hover { background: var(--surface-2); }
+    .platform-btn.active { border-color: var(--blue-text); background: var(--blue-bg); color: var(--blue-dark); font-weight: 500; }
+    .platform-btn i { font-size: 15px; }
+
+    /* Primary button */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      background: var(--text-primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.12s;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .btn-secondary:hover { background: var(--surface-2); }
+
+    /* Query cards */
+    .queries-section { margin-top: 1.5rem; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      color: var(--text-hint);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .query-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      margin-bottom: 6px;
+    }
+
+    .query-platform-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 4px;
+      min-width: 90px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .badge-fb { background: var(--blue-bg); color: var(--blue-text); }
+    .badge-wa { background: var(--green-bg); color: var(--green-text); }
+    .badge-ig { background: var(--pink-bg); color: var(--pink-text); }
+    .badge-tg { background: var(--teal-bg); color: var(--teal-text); }
+
+    .query-text {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      flex: 1;
+      word-break: break-all;
+    }
+
+    .btn-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      padding: 6px 12px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--text-primary);
+      cursor: pointer;
+      text-decoration: none;
+      font-family: var(--font-sans);
+      white-space: nowrap;
+      transition: background 0.12s;
+    }
+
+    .btn-open:hover { background: var(--surface-2); }
+
+    /* Registry table */
+    .registry-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .table-wrap {
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    table.registry {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 13px;
+    }
+
+    table.registry th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-hint);
+      border-bottom: 0.5px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    table.registry td {
+      padding: 11px 14px;
+      border-bottom: 0.5px solid var(--border);
+      color: var(--text-primary);
+      vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    table.registry tr:last-child td { border-bottom: none; }
+    table.registry tbody tr:hover td { background: var(--surface-2); }
+
+    .platform-pill {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .score-dots { display: flex; gap: 3px; align-items: center; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot.on { background: var(--blue-text); }
+    .dot.off { background: var(--border); }
+
+    select.inline-select {
+      font-size: 12px;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      outline: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-secondary);
+    }
+
+    .empty-state i { font-size: 28px; display: block; margin-bottom: 10px; color: var(--text-hint); }
+    .empty-state p { font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto; }
+
+    /* Action row */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      width: 520px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 1.25rem;
+      color: var(--text-primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 1.25rem;
+    }
+
+    /* Guide page */
+    .guide-step {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--text-primary);
+      color: white;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-content h3 { font-size: 14px; font-weight: 500; margin-bottom: 4px; color: var(--text-primary); }
+    .step-content p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+    .tip-card {
+      background: var(--blue-bg);
+      border: 0.5px solid rgba(24,95,165,0.15);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+
+    .tip-card .tip-title { font-size: 12px; font-weight: 500; color: var(--blue-dark); margin-bottom: 4px; }
+    .tip-card p { font-size: 13px; color: var(--blue-text); line-height: 1.6; }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { padding: 1.25rem; }
+      .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+      .field.span-2 { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"><i class="ti ti-search"></i></div>
+      <div>
+        <div class="logo-name">Community finder</div>
+        <div class="logo-tagline">Discover &amp; engage</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-title">Tools</div>
+    <button class="sidebar-nav-item active" onclick="showPage('search', this)">
+      <i class="ti ti-search"></i> Search queries
+    </button>
+    <button class="sidebar-nav-item" onclick="showPage('registry', this)">
+      <i class="ti ti-table"></i> Registry
+    </button>
+
+    <div class="sidebar-section-title">Help</div>
+    <button class="sidebar-nav-item" onclick="showPage('guide', this)">
+      <i class="ti ti-book"></i> How to use
+    </button>
+
+    <div class="sidebar-stats">
+      <div class="sidebar-section-title">Registry stats</div>
+      <div class="stat-row"><span class="stat-label">Total communities</span><span class="stat-value" id="stat-total">0</span></div>
+      <div class="stat-row"><span class="stat-label">Qualified</span><span class="stat-value" id="stat-qualified">0</span></div>
+      <div class="stat-row"><span class="stat-label">Contacted</span><span class="stat-value" id="stat-contacted">0</span></div>
+      <div class="stat-row"><span class="stat-label">Engaged</span><span class="stat-value" id="stat-engaged">0</span></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Search page -->
+    <div class="page active" id="page-search">
+      <div class="page-header">
+        <h1 class="page-title">Generate search queries</h1>
+        <p class="page-sub">Enter your keyword(s) and location to generate structured Google search queries across platforms. Open each query in Google, find relevant communities, then log them in your registry.</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label">Keyword(s)</label>
+          <input type="text" id="kw" placeholder="e.g. climate action, youth, mobility" />
+        </div>
+        <div class="field">
+          <label class="field-label">Location</label>
+          <input type="text" id="loc" placeholder="e.g. Brussels, Ghent, Belgium" />
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom: 1.5rem;">
+        <label class="field-label" style="margin-bottom: 8px;">Platforms</label>
+        <div class="platform-row">
+          <button class="platform-btn active" data-platform="facebook" onclick="togglePlatform(this)"><i class="ti ti-brand-facebook"></i> Facebook groups</button>
+          <button class="platform-btn active" data-platform="whatsapp" onclick="togglePlatform(this)"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
+          <button class="platform-btn" data-platform="instagram" onclick="togglePlatform(this)"><i class="ti ti-brand-instagram"></i> Instagram</button>
+          <button class="platform-btn" data-platform="telegram" onclick="togglePlatform(this)"><i class="ti ti-brand-telegram"></i> Telegram</button>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="generateQueries()">
+        <i class="ti ti-search"></i> Generate queries
+      </button>
+
+      <div class="queries-section" id="queries-section" style="display:none;">
+        <div class="section-label" style="margin-top: 2rem;">Generated queries — open each in Google</div>
+        <div id="queries-list"></div>
+        <div style="margin-top: 12px; padding: 12px 14px; background: var(--surface-2); border-radius: var(--radius-md); font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+          <strong style="color: var(--text-primary);">Next step:</strong> Open each query in Google, find relevant groups, then go to the <strong style="color: var(--text-primary);">Registry</strong> tab to log what you discover.
+        </div>
+      </div>
+    </div>
+
+    <!-- Registry page -->
+    <div class="page" id="page-registry">
+      <div class="page-header">
+        <h1 class="page-title">Community registry</h1>
+        <p class="page-sub">Log, qualify, and track every community you discover. Update status as you move from discovery to active engagement.</p>
+      </div>
+
+      <div class="registry-header">
+        <div class="section-label" style="margin-bottom: 0;">All communities</div>
+        <button class="btn-primary" onclick="openModal()"><i class="ti ti-plus"></i> Add community</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="registry">
+          <thead>
+            <tr>
+              <th style="width:24%">Name</th>
+              <th style="width:11%">Platform</th>
+              <th style="width:13%">Location</th>
+              <th style="width:13%">Topic</th>
+              <th style="width:10%">Members</th>
+              <th style="width:12%">Relevance</th>
+              <th style="width:12%">Activity</th>
+              <th style="width:11%">Status</th>
+            </tr>
+          </thead>
+          <tbody id="registry-body">
+            <tr>
+              <td colspan="8">
+                <div class="empty-state">
+                  <i class="ti ti-inbox"></i>
+                  <p>No communities logged yet. Generate queries, search Google, then add your findings here.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="action-row" id="export-row" style="display:none;">
+        <button class="btn-secondary" onclick="exportCSV()"><i class="ti ti-download"></i> Export CSV</button>
+        <button class="btn-secondary" onclick="clearRegistry()"><i class="ti ti-trash"></i> Clear all</button>
+      </div>
+    </div>
+
+    <!-- Guide page -->
+    <div class="page" id="page-guide">
+      <div class="page-header">
+        <h1 class="page-title">How to use this tool</h1>
+        <p class="page-sub">A practical workflow for discovering and qualifying online communities for engagement.</p>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Enter your keyword and location</h3>
+          <p>Go to Search queries. Type the topic you are looking for (e.g. <em>climate action</em>) and the city or region (e.g. <em>Brussels</em>). Select the platforms you want to search.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Open each query in Google</h3>
+          <p>Click the Open button next to each generated query. Google will return indexed public group pages, WhatsApp invite links, and Instagram accounts matching your search.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Evaluate each result manually</h3>
+          <p>Visit each group page directly. Check member count, posting frequency, and whether the topic is genuinely relevant. Look for the <em>Very active</em> label on Facebook groups.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Log communities in the registry</h3>
+          <p>Add each relevant community with its platform, location, topic, member count, and a relevance score (1–5). Set the status to <em>Discovered</em> initially.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h3>Qualify and update status</h3>
+          <p>As you research further, update each entry: <em>Qualified</em> once you have confirmed it is relevant and active, <em>Contacted</em> once you have reached out, <em>Engaged</em> once there is a relationship.</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem;">
+        <div class="section-label">Platform notes</div>
+
+        <div class="tip-card">
+          <div class="tip-title">Facebook groups</div>
+          <p>The query <code>site:facebook.com/groups "[city]" "[keyword]"</code> returns indexed public groups. Add <code>"very active"</code> to filter for higher-activity groups. Member count is visible on the group page without logging in.</p>
+        </div>
+
+        <div class="tip-card" style="background: var(--green-bg); border-color: rgba(59,109,17,0.15);">
+          <div class="tip-title" style="color: var(--green-text);">WhatsApp communities</div>
+          <p style="color: var(--green-text);">WhatsApp groups cannot be searched directly. This tool finds publicly shared invite links (<code>chat.whatsapp.com</code>) that group admins have posted on Facebook, websites, or other platforms. Always verify the group is still active before using the link.</p>
+        </div>
+
+        <div class="tip-card" style="background: var(--pink-bg); border-color: rgba(153,53,86,0.15);">
+          <div class="tip-title" style="color: var(--pink-text);">Instagram</div>
+          <p style="color: var(--pink-text);">Instagram has no group structure. The query finds public accounts matching your keyword and location. Supplement with hashtag and location tag searches directly inside Instagram.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Add community modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h2 class="modal-title">Log a community</h2>
+    <div class="form-grid">
+      <div class="field span-2">
+        <label class="field-label">Community name</label>
+        <input type="text" id="m-name" placeholder="e.g. Brussels Climate Action" />
+      </div>
+      <div class="field">
+        <label class="field-label">Platform</label>
+        <select id="m-platform">
+          <option value="fb">Facebook group</option>
+          <option value="wa">WhatsApp</option>
+          <option value="ig">Instagram</option>
+          <option value="tg">Telegram</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Location</label>
+        <input type="text" id="m-location" placeholder="e.g. Brussels" />
+      </div>
+      <div class="field">
+        <label class="field-label">Topic / interest</label>
+        <input type="text" id="m-topic" placeholder="e.g. climate" />
+      </div>
+      <div class="field">
+        <label class="field-label">Members (approx.)</label>
+        <input type="text" id="m-members" placeholder="e.g. 1200" />
+      </div>
+      <div class="field">
+        <label class="field-label">Relevance (1–5)</label>
+        <select id="m-relevance">
+          <option value="5">5 — very high</option>
+          <option value="4">4 — high</option>
+          <option value="3" selected>3 — medium</option>
+          <option value="2">2 — low</option>
+          <option value="1">1 — marginal</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Activity level</label>
+        <select id="m-activity">
+          <option value="very active">Very active</option>
+          <option value="active" selected>Active</option>
+          <option value="moderate">Moderate</option>
+          <option value="low">Low</option>
+          <option value="unknown">Unknown</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Status</label>
+        <select id="m-status">
+          <option value="discovered">Discovered</option>
+          <option value="qualified">Qualified</option>
+          <option value="contacted">Contacted</option>
+          <option value="engaged">Engaged</option>
+        </select>
+      </div>
+      <div class="field span-2">
+        <label class="field-label">Link / URL (optional)</label>
+        <input type="url" id="m-link" placeholder="https://..." />
+      </div>
+      <div class="field span-2">
+        <label class="field-label">Notes (optional)</label>
+        <textarea id="m-notes" rows="2" placeholder="Admin name, contact path, context..." style="resize:vertical;"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="addCommunity()"><i class="ti ti-check"></i> Add to registry</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const registry = JSON.parse(localStorage.getItem('cd-registry') || '[]');
+
+  function save() {
+    localStorage.setItem('cd-registry', JSON.stringify(registry));
+    updateStats();
+  }
+
+  function showPage(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (id === 'registry') renderRegistry();
+  }
+
+  function togglePlatform(btn) {
+    btn.classList.toggle('active');
+  }
+
+  function getActivePlatforms() {
+    return [...document.querySelectorAll('.platform-btn.active')].map(b => b.dataset.platform);
+  }
+
+  function generateQueries() {
+    const kw = document.getElementById('kw').value.trim();
+    const loc = document.getElementById('loc').value.trim();
+    if (!kw || !loc) { alert('Please enter both a keyword and a location.'); return; }
+    const platforms = getActivePlatforms();
+    if (!platforms.length) { alert('Please select at least one platform.'); return; }
+
+    const kwEnc = encodeURIComponent('"' + kw + '"');
+    const locEnc = encodeURIComponent('"' + loc + '"');
+    const queries = [];
+
+    if (platforms.includes('facebook')) {
+      queries.push({ badge: 'badge-fb', label: 'Facebook groups', query: `site:facebook.com/groups "${loc}" "${kw}"`, url: `https://www.google.com/search?q=site%3Afacebook.com%2Fgroups+${locEnc}+${kwEnc}` });
+      queries.push({ badge: 'badge-fb', label: 'Facebook — very active', query: `site:facebook.com/groups "${loc}" "${kw}" "very active"`, url: `https://www.google.com/search?q=site%3Afacebook.com%2Fgroups+${locEnc}+${kwEnc}+%22very+active%22` });
+    }
+    if (platforms.includes('whatsapp')) {
+      queries.push({ badge: 'badge-wa', label: 'WhatsApp via Facebook', query: `site:facebook.com "chat.whatsapp.com" "${loc}" "${kw}"`, url: `https://www.google.com/search?q=site%3Afacebook.com+%22chat.whatsapp.com%22+${locEnc}+${kwEnc}` });
+      queries.push({ badge: 'badge-wa', label: 'WhatsApp web-wide', query: `"chat.whatsapp.com" "${loc}" "${kw}"`, url: `https://www.google.com/search?q=%22chat.whatsapp.com%22+${locEnc}+${kwEnc}` });
+    }
+    if (platforms.includes('instagram')) {
+      queries.push({ badge: 'badge-ig', label: 'Instagram accounts', query: `site:instagram.com "${loc}" "${kw}"`, url: `https://www.google.com/search?q=site%3Ainstagram.com+${locEnc}+${kwEnc}` });
+    }
+    if (platforms.includes('telegram')) {
+      queries.push({ badge: 'badge-tg', label: 'Telegram groups', query: `site:t.me "${loc}" "${kw}"`, url: `https://www.google.com/search?q=site%3At.me+${locEnc}+${kwEnc}` });
+    }
+
+    const list = document.getElementById('queries-list');
+    list.innerHTML = '';
+    queries.forEach(q => {
+      const div = document.createElement('div');
+      div.className = 'query-card';
+      div.innerHTML = `<span class="query-platform-badge ${q.badge}">${q.label}</span><span class="query-text">${q.query}</span><a class="btn-open" href="${q.url}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i> Open</a>`;
+      list.appendChild(div);
+    });
+
+    document.getElementById('queries-section').style.display = 'block';
+  }
+
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    ['m-name','m-location','m-topic','m-members','m-link','m-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('m-relevance').value = '3';
+    document.getElementById('m-activity').value = 'active';
+    document.getElementById('m-status').value = 'discovered';
+    document.getElementById('m-platform').value = 'fb';
+  }
+
+  function addCommunity() {
+    const name = document.getElementById('m-name').value.trim();
+    if (!name) { alert('Please enter a community name.'); return; }
+    registry.push({
+      id: Date.now(),
+      name,
+      platform: document.getElementById('m-platform').value,
+      location: document.getElementById('m-location').value.trim(),
+      topic: document.getElementById('m-topic').value.trim(),
+      members: document.getElementById('m-members').value.trim(),
+      relevance: parseInt(document.getElementById('m-relevance').value),
+      activity: document.getElementById('m-activity').value,
+      status: document.getElementById('m-status').value,
+      link: document.getElementById('m-link').value.trim(),
+      notes: document.getElementById('m-notes').value.trim()
+    });
+    save();
+    renderRegistry();
+    closeModal();
+    showPage('registry', document.querySelectorAll('.sidebar-nav-item')[1]);
+  }
+
+  function updateStatus(id, val) {
+    const entry = registry.find(r => r.id === id);
+    if (entry) { entry.status = val; save(); updateStats(); }
+  }
+
+  const statusColors = { discovered: 'color:var(--text-secondary)', qualified: 'color:var(--blue-text)', contacted: 'color:var(--green-text)', engaged: 'color:var(--teal-text); font-weight:500' };
+  const statusLabels = { discovered: 'Discovered', qualified: 'Qualified', contacted: 'Contacted', engaged: 'Engaged' };
+  const platformLabels = { fb: 'FB', wa: 'WA', ig: 'IG', tg: 'TG' };
+  const platformBadges = { fb: 'badge-fb', wa: 'badge-wa', ig: 'badge-ig', tg: 'badge-tg' };
+
+  function renderRegistry() {
+    const tbody = document.getElementById('registry-body');
+    if (!registry.length) {
+      tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="ti ti-inbox"></i><p>No communities logged yet. Generate queries, search Google, then add your findings here.</p></div></td></tr>';
+      document.getElementById('export-row').style.display = 'none';
+      return;
+    }
+    tbody.innerHTML = registry.map(r => {
+      const dots = [1,2,3,4,5].map(d => `<div class="dot ${d <= r.relevance ? 'on' : 'off'}"></div>`).join('');
+      const nameCell = r.link ? `<a href="${r.link}" target="_blank" rel="noopener" style="color:var(--text-primary);text-decoration:underline;text-underline-offset:2px;" title="${r.name}">${r.name}</a>` : `<span title="${r.name}">${r.name}</span>`;
+      const opts = Object.entries(statusLabels).map(([v,l]) => `<option value="${v}" ${v===r.status?'selected':''}>${l}</option>`).join('');
+      return `<tr>
+        <td>${nameCell}</td>
+        <td><span class="platform-pill ${platformBadges[r.platform]}">${platformLabels[r.platform]}</span></td>
+        <td title="${r.location}">${r.location||'—'}</td>
+        <td title="${r.topic}">${r.topic||'—'}</td>
+        <td>${r.members ? Number(r.members).toLocaleString() : '—'}</td>
+        <td><div class="score-dots">${dots}</div></td>
+        <td style="font-size:12px;color:var(--text-secondary)">${r.activity||'—'}</td>
+        <td><select class="inline-select" style="${statusColors[r.status]||''}" onchange="updateStatus(${r.id}, this.value)">${opts}</select></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('export-row').style.display = 'flex';
+  }
+
+  function exportCSV() {
+    const headers = ['Name','Platform','Location','Topic','Members','Relevance','Activity','Status','Link','Notes'];
+    const rows = registry.map(r => [r.name, r.platform, r.location, r.topic, r.members, r.relevance, r.activity, r.status, r.link, r.notes].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+    a.download = 'community-registry.csv';
+    a.click();
+  }
+
+  function clearRegistry() {
+    if (!confirm('Clear all entries? This cannot be undone.')) return;
+    registry.length = 0;
+    save();
+    renderRegistry();
+  }
+
+  function updateStats() {
+    document.getElementById('stat-total').textContent = registry.length;
+    document.getElementById('stat-qualified').textContent = registry.filter(r => r.status === 'qualified').length;
+    document.getElementById('stat-contacted').textContent = registry.filter(r => r.status === 'contacted').length;
+    document.getElementById('stat-engaged').textContent = registry.filter(r => r.status === 'engaged').length;
+  }
+
+  document.getElementById('modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  renderRegistry();
+  updateStats();
+</script>
+
+</body>
+</html>
